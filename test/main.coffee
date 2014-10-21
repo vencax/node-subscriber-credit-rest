@@ -21,29 +21,45 @@ describe "app", ->
     app.use(bodyParser.urlencoded({ extended: false }))
     app.use(bodyParser.json())
 
-    Sequelize = require('sequelize')
-    sequelize = new Sequelize('database', 'username', 'password',
+    db =
+      Sequelize: require('sequelize')
+
+    db.sequelize = new db.Sequelize('database', 'username', 'password',
       # sqlite! now!
       dialect: 'sqlite'
     )
-    .authenticate()
-    .complete (err) ->
-      return done("Unable to connect to the database: #{err}") if err
+    require(__dirname + '/../models.js')(db)
 
-      api = require(__dirname + '/../index')(sequelize
-      , (request) ->
-        on: (event, handler) ->
-          handler({statusCode: 200})
-      , (response) ->
-        (response, handler) ->
+    db.sequelize.sync().on 'success', () ->
+
+      account =
+        uid: 11
+        state: 0
+
+      db.CreditAccount.create(account).on 'success', (account) ->
+
+        _prepareReq = (request) ->
+          on: (event, handler) ->
+            handler({statusCode: 200})
+
+        _parseResp = (response, handler) ->
           handler({uid: 11, desc: 'pokus1', amount: 300})
           handler({uid: 11, desc: 'pokus2', amount: -100})
-      )
-      app.use('/api', api)
 
-      server = app.listen port, (err) ->
-        return done(err) if err
-        done()
+        apiM = require(__dirname + '/../index')
+        api = apiM db, _prepareReq, _parseResp, () ->
+          done()
+
+        app.use (req, res, next) ->
+          req.user =
+            id: 11
+          next()
+
+        app.use('/api', api)
+
+        server = app.listen port, (err) ->
+          return done(err) if err
+
 
   after (done) ->
     server.close()

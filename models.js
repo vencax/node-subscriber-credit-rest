@@ -1,20 +1,16 @@
 
 
-module.exports = function(sequelize) {
+module.exports = function(db) {
 
-  return {
+  db.CreditAccount = db.sequelize.define('CreditAccount', {
+    uid: db.Sequelize.INTEGER,
+    state: db.Sequelize.FLOAT
+  });
 
-    CreditAccount: sequelize.define('CreditAccount', {
-      uid: sequelize.INTEGER,
-      state: Sequelize.FLOAT
-    }),
-
-    CreditAccountChange: sequelize.define('CreditAccountChange', {
-      uid: sequelize.INTEGER,
-      desc: Sequelize.STRING,
-      amount: Sequelize.FLOAT
-    })
-
-  };
+  db.CreditAccountChange = db.sequelize.define('CreditAccountChange', {
+    uid: db.Sequelize.INTEGER,
+    desc: db.Sequelize.STRING,
+    amount: db.Sequelize.FLOAT
+  });
 
 };

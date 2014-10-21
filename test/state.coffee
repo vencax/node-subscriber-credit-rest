@@ -12,8 +12,10 @@ module.exports = (port, request) ->
       uid: 11
       state: 200
 
-    request.get "#{s}/", (err, res) ->
+    request.get "#{s}/", (err, res, body) ->
       return done err if err
       res.statusCode.should.eql 200
-      res.body.should.eql data
+      body = JSON.parse(body)
+      body.uid.should.eql data.uid
+      body.state.should.eql data.state
       done()

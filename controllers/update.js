@@ -1,21 +1,26 @@
 var request = require('request');
 
-var onResponse = function(response, models) {
-  var r = JSON.parse(response.read());
-}
 
-exports.update = function(models, createRequest, onUpdateResponse) {
+exports.update = function(models, createRequest, onUpdateResponse, done) {
+
+  var _processChange = function(change) {
+    models.CreditAccount
+      .find({where: {uid: change.uid}})
+      .on('success', function(account) {
+        if (!account) return;
+        models.CreditAccountChange
+          .create(change)
+          .on('success', function(saved){
+            account.increment('state', {by: change.amount});
+          });
+      })
+  };
+
   createRequest(request)
     .on('response', function(response) {
       if (response.statusCode === 200) {
-
-        onUpdateResponse(response, function(change) {
-          console.log(change);
-          models.CreditAccountChange.create(change).success(function(saved){
-            console.log(saved)
-          });
-        });
-
+        onUpdateResponse(response, _processChange);
+        if (done) return done();
       }
     });
 };
