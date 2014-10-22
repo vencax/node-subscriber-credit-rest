@@ -26,3 +26,49 @@ module.exports = (apiMod, db, addr, request) ->
         body.state.should.eql _lastState + 200
         done()
     updater.doUpdate()
+
+  it "shall update credit account and save change into history", (done) ->
+    change =
+      uid: 11
+      amount: -300
+      desc: "Gandalf's hat"
+
+    apiMod.updateCredit db, change, (err, data) ->
+      return done(err) if err
+
+      request.get "#{addr}/", (err, res, body) ->
+        return done err if err
+        res.statusCode.should.eql 200
+        body = JSON.parse(body)
+        body.uid.should.eql 11
+        body.state.should.eql _lastState + 200 - 300
+        done()
+
+      # request.get "#{addr}/history", (err, res, body) ->
+      #   return done err if err
+      #   res.statusCode.should.eql 200
+      #   body = JSON.parse(body)
+      #   body.uid.should.eql 11
+      #   body.state.should.eql _lastState + 200 - 300
+      #   done()
+
+  it "must not to make any update on insufficient funds", (done) ->
+    change =
+      uid: 11
+      amount: -3000
+      desc: "Gandalf's cloack"
+
+    apiMod.updateCredit db, change, (err, data) ->
+      return done("must not pass!") if not err
+
+      err.should.eql "insufficient funds!"
+
+      request.get "#{addr}/", (err, res, body) ->
+        return done err if err
+        res.statusCode.should.eql 200
+        body = JSON.parse(body)
+        body.uid.should.eql 11
+        body.state.should.eql _lastState + 200 - 300
+        done()
+
+      #TODO check history has not changed
