@@ -4,13 +4,18 @@ should = require('should')
 
 module.exports = (apiMod, db, addr, request) ->
 
+  _data = [
+    {uid: 11, desc: 'pokus1', amount: 300, createdAt: new Date(100)},
+    {uid: 11, desc: 'pokus2', amount: -100, createdAt: new Date(1000)}
+  ]
+
   _handler =
     init: (request) ->
       on: (event, handler) ->
         handler({statusCode: 200})
     onResponse: (response, handler, cb) ->
-      handler {uid: 11, desc: 'pokus1', amount: 300}, ->
-        handler {uid: 11, desc: 'pokus2', amount: -100}, ->
+      handler _data[0], ->
+        handler _data[1], ->
           cb()
 
   _lastState = 200

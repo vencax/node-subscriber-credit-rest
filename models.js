@@ -10,7 +10,8 @@ module.exports = function(db) {
   db.CreditAccountChange = db.sequelize.define('CreditAccountChange', {
     uid: db.Sequelize.INTEGER,
     desc: db.Sequelize.STRING,
-    amount: db.Sequelize.FLOAT
-  });
+    amount: db.Sequelize.FLOAT,
+    createdAt: db.Sequelize.DATE
+  }, {timestamps: false});
 
 };
