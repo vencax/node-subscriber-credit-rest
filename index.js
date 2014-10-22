@@ -14,8 +14,10 @@ exports.app = function(db) {
   return api;
 };
 
+var Update = require('./controllers/update');
+
 exports.startUpdating = function(db, accounthandler) {
-  var Update = require('./controllers/update')
+
   var updater = Update.getupdater(db, accounthandler);
 
   // default 6 hours
@@ -27,3 +29,5 @@ exports.startUpdating = function(db, accounthandler) {
 
   return updater;
 }
+
+exports.updateCredit = Update.updateCredit;
