@@ -30,4 +30,6 @@ exports.startUpdating = function(db, accounthandler) {
   return updater;
 }
 
-exports.updateCredit = Update.updateCredit;
+exports.update = Update.updateCredit;
+
+exports.models = require('./models')
