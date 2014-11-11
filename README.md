@@ -1,4 +1,4 @@
-[![build status](https://travis-ci.org/vencax/node-subscriber-credit-rest.svg)](https://travis-ci.org/vencax/node-subscriber-credit-rest)
+[![build status](https://api.travis-ci.org/vencax/node-dhcp-rest-conf.svg)](https://travis-ci.org/vencax/node-subscriber-credit-rest)
 
 # REST server for subscriber-credit (SC)
 
