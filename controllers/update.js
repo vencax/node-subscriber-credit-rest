@@ -1,5 +1,6 @@
 
 var EventEmitter = require("events").EventEmitter;
+var async = require('async');
 
 
 var _increase = function(change, cb) {
@@ -42,12 +43,19 @@ exports.getupdater = function(models, accessor) {
 
   ee.doUpdate = function() {
     accessor(function(data) {
-      data.forEach(function(change) {
-        _increase(models.CreditChange.build(change), function() {
-          console.log("CREDIT: " + change);
-        });
+
+      async.each(data, function(change, callback) {
+
+        _increase(models.CreditChange.build(change), callback);
+
+      }, function(err){
+        if( err ) {
+          ee.emit('updated', err);
+        } else {
+          ee.emit('updated');
+        }
       });
-      ee.emit('updated');
+
     });
   };
 
