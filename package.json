@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "express": "^4.9.0",
-    "request": "^2.45.0",
     "sequelize": "^2.0.0-rc2"
   },
   "devDependencies": {

@@ -1,36 +1,29 @@
 
 
 module.exports = function(models) {
+
+  function _get_changes(uid, done) {
+    models.CreditChange
+      .findAll({where: {uid: uid}})
+      .on('success', done);
+  };
+
   return {
 
-    findAccount: function(req, res, next) {
-      models.CreditAccount
-        .find({where: {uid: req.user.id}})
-        .on('success', function(account) {
-          if (account) {
-            req.account = account;
-            return next();
-          } else {
-            return res.status(404).send('account not found');
-          }
-        })
-    },
-
     curr: function(req, res, next) {
-      res.status(200).send(req.account);
+      _get_changes(req.user.id, function(changes) {
+        var state = 0;
+        changes.forEach(function(ch) {
+          state += ch.amount;
+        });
+        res.json(state);
+      });
     },
 
     history: function(req, res, next) {
-      var h = [{
-        uid: 11,
-        desc: 'pokus1',
-        amount: 300
-      }, {
-        uid: 11,
-        desc: 'pokus2',
-        amount: -100
-      }];
-      res.status(200).send(h);
+      _get_changes(req.user.id, function(changes) {
+        res.json(changes);
+      });
     }
 
   };

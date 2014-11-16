@@ -1,5 +1,6 @@
 var express = require('express');
 
+var Update = require('./controllers/update');
 
 // create API app -------------------------------------------------------------
 
@@ -8,13 +9,15 @@ exports.app = function(db) {
   var api = module.exports = express();
 
   var routes = require('./controllers/state')(db);
-  api.get('/', routes.findAccount, routes.curr);
-  api.get('/history/:days', routes.history);
+  api.get('/current/:uid', routes.curr);
+  api.get('/history', routes.history);
+
+  if(process.env.MOCK_TRANSFER) {
+    api.post('/increase', Update.mockincrease(db));
+  }
 
   return api;
 };
-
-var Update = require('./controllers/update');
 
 exports.startUpdating = function(db, accounthandler) {
 
@@ -26,6 +29,8 @@ exports.startUpdating = function(db, accounthandler) {
   setInterval(function() {
     updater.doUpdate();
   }, interval);
+
+  updater.doUpdate();
 
   return updater;
 }

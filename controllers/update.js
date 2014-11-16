@@ -1,62 +1,71 @@
-var request = require('request');
+
 var EventEmitter = require("events").EventEmitter;
 
 
-var _increase = function(account, change, cb) {
+var _increase = function(change, cb) {
 
   //TODO models.sequelize.transaction(function(t) {
 
   var onError = function(err) {
-    t.rollboack();
+    // t.rollboack();
     cb(err, null);
   };
 
   change.save(/*{transaction: t}*/)
     .on('success', function(saved){
-      account.state += change.amount;
-      account.save(/*{transaction: t}*/)
-        .on('success', function() {
-          cb(null, account);
-        })
-        .on('error', onError);
+      cb(null, saved);
     })
     .on('error', onError);
 }
 
 var _doProcessChange = exports.updateCredit = function(models, change, done) {
 
-  models.CreditAccount.find({where: {uid: change.uid}})
-    .on('success', function(account) {
-      if (!account) {
-        return done('account not found');
-      }
+  models.CreditChange
+    .findAll({where: {uid: change.uid}})
+    .on('success', function(changes) {
+      var state = 0;
+      changes.forEach(function(ch) {
+        state += ch.amount;
+      });
 
-      if (account.state + change.amount < 0) {
+      if (state + change.amount < 0) {
         return done('insufficient funds!');
       }
 
-      _increase(account, models.CreditAccountChange.build(change), done);
+      _increase(models.CreditChange.build(change), done);
     })
 }
 
-exports.getupdater = function(models, accounthandler) {
+exports.getupdater = function(models, accessor) {
 
   var ee = new EventEmitter();
 
-  var _processChange = function(change, cb) {
-    _doProcessChange(models, change, cb);
-  };
-
   ee.doUpdate = function() {
-    accounthandler.init(request)
-      .on('response', function(response) {
-        if (response.statusCode === 200) {
-          accounthandler.onResponse(response, _processChange, function() {
-            ee.emit('bankaccountchecked');
-          });
-        }
+    accessor(function(data) {
+      data.forEach(function(change) {
+        _increase(models.CreditChange.build(change), function() {
+          console.log("CREDIT: " + change);
+        });
       });
+      ee.emit('updated');
+    });
   };
 
   return ee;
 };
+
+exports.mockincrease = function(models) {
+  return function(req, res, next) {
+    var ch = models.CreditChange.build({
+      uid: req.body.uid, createdAt: new Date(),
+      desc: 'mock credit increase!', amount: req.body.amount
+    });
+    _increase(ch, function(err, change) {
+      if(err) {
+        res.status(400).send(err);
+      } else {
+        res.json(change);
+      }
+    })
+  };
+}
