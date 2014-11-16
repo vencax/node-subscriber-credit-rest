@@ -30,8 +30,6 @@ exports.startUpdating = function(db, accounthandler) {
     updater.doUpdate();
   }, interval);
 
-  updater.doUpdate();
-
   return updater;
 }
 
