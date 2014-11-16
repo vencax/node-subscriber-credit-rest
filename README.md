@@ -13,15 +13,12 @@ Offers REST API as an express app that can be hooked just like this:
 	...
 	var app = express();
 	...
-	var createBankAPIReq = function(request) {
-		// func that shall prepare request for bank account API
-	};
-	var onBankAPIResponse = function(response, cb) {
-		// func that shall parse response from bank account API and call cb on each
-		// cb expect change objects:
+	var bankaccessor = function(done) {
+		// func that shall all relevan items from bank account API and pass them to done
+		// each item object expected like this:
 		// {uid: 11, desc: 'pokus1', amount: 300, date: date}
 	};
-	var api = require('node-subscriber-credit-rest')(sequelize, createBankAPIReq, onBankAPIResponse);
+	var api = require('node-subscriber-credit-rest')(sequelize, bankaccessor);
 	api.use('/api/credit', api);
 
 If you want to give a feedback, [raise an issue](https://github.com/vencax/node-subscriber-credit-rest/issues).
