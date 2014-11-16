@@ -14,8 +14,9 @@ describe "app", ->
 
   apiMod = require(__dirname + '/../index')
   g = {}
-  db =
-    Sequelize: require('sequelize')
+  Sequelize = require('sequelize')
+  db = {}
+
 
   before (done) ->
     # init server
@@ -23,11 +24,15 @@ describe "app", ->
     app.use(bodyParser.urlencoded({ extended: false }))
     app.use(bodyParser.json())
 
-    db.sequelize = new db.Sequelize('database', 'username', 'password',
+    db.sequelize = new Sequelize('database', 'username', 'password',
       # sqlite! now!
       dialect: 'sqlite'
     )
-    require(__dirname + '/../models.js')(db) # register models
+
+    # register models
+    mdls = require(__dirname + '/../models.js')(db.sequelize, Sequelize)
+    for k, mdl of mdls
+      db[k] = mdl
 
     db.sequelize.sync().on 'success', () ->
 
@@ -57,5 +62,5 @@ describe "app", ->
   # run the rest of tests
   baseurl = "http://localhost:#{port}/api"
 
-  require('./state')(db, baseurl, request)
   require('./update')(apiMod, db, baseurl, request)
+  require('./state')(db, baseurl, request)
