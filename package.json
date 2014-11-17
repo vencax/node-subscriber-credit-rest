@@ -1,5 +1,5 @@
 {
-  "name": "node-subscriber-credit-rest",
+  "name": "subscriber-credit-rest",
   "version": "0.0.1",
   "description": "REST server maintainence of subscriber credit",
   "main": "index.js",
