@@ -1,22 +1,19 @@
-var express = require('express');
 
 var Update = require('./controllers/update');
 
 // create API app -------------------------------------------------------------
 
-exports.app = function(db) {
-
-  var api = module.exports = express();
+exports.hookTo = function(app, db) {
 
   var routes = require('./controllers/state')(db);
-  api.get('/current/:uid', routes.curr);
-  api.get('/history', routes.history);
+  app.get('/current/:uid', routes.curr);
+  app.get('/history', routes.history);
 
   if(process.env.MOCK_TRANSFER) {
-    api.post('/increase', Update.mockincrease(db));
+    app.post('/increase', Update.mockincrease(db));
   }
 
-  return api;
+  return app;  // for chaining
 };
 
 exports.startUpdating = function(db, accounthandler) {

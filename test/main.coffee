@@ -36,7 +36,7 @@ describe "app", ->
 
     db.sequelize.sync().on 'success', () ->
 
-      api = apiMod.app db
+      api = apiMod.hookTo express(), db
 
       app.use (req, res, next) ->
         req.user =
