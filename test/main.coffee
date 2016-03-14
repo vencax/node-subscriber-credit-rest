@@ -1,7 +1,7 @@
 
 should = require('should')
 http = require('http')
-request = require('request').defaults({timeout: 5000})
+request = require('request').defaults({timeout: 50000})
 fs = require('fs')
 bodyParser = require('body-parser')
 express = require('express')
@@ -13,10 +13,9 @@ port = process.env.PORT || 3333
 describe "app", ->
 
   apiMod = require(__dirname + '/../index')
-  g = {}
+  g =
+    apiMod: apiMod
   Sequelize = require('sequelize')
-  db = {}
-
 
   before (done) ->
     # init server
@@ -24,19 +23,17 @@ describe "app", ->
     app.use(bodyParser.urlencoded({ extended: false }))
     app.use(bodyParser.json())
 
-    db.sequelize = new Sequelize('database', 'username', 'password',
+    sequelize = new Sequelize 'database', 'username', 'password',
       # sqlite! now!
       dialect: 'sqlite'
-    )
+    g.sequelize = sequelize
 
     # register models
-    mdls = require(__dirname + '/../models.js')(db.sequelize, Sequelize)
-    for k, mdl of mdls
-      db[k] = mdl
+    mdls = require(__dirname + '/../models')(sequelize, Sequelize)
 
-    db.sequelize.sync().on 'success', () ->
-
-      api = apiMod.hookTo express(), db
+    sequelize.sync().then () ->
+      api = express()
+      api = apiMod api, sequelize.models
 
       app.use (req, res, next) ->
         req.user =
@@ -50,6 +47,8 @@ describe "app", ->
         done()
 
       g.app = app
+    .catch (err)->
+      done(err)
 
   after (done) ->
     g.server.close()
@@ -60,7 +59,7 @@ describe "app", ->
     done()
 
   # run the rest of tests
-  baseurl = "http://localhost:#{port}/api"
+  g.baseurl = "http://localhost:#{port}/api"
 
-  require('./update')(apiMod, db, baseurl, request)
-  require('./state')(db, baseurl, request)
+  require('./update')(g)
+  require('./state')(g)

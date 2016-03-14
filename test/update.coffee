@@ -1,40 +1,25 @@
 
 should = require('should')
+request = require('request').defaults({timeout: 50000})
 
 
-module.exports = (apiMod, db, addr, request) ->
+module.exports = (g) ->
 
-  _data = [
-    {uid: 11, desc: 'pokus1', amount: 300, createdAt: new Date(100)},
-    {uid: 11, desc: 'pokus2', amount: -100, createdAt: new Date(1000)}
-  ]
+  addr = g.baseurl
+  updateMod = require('../controllers/update')
 
-  _accessor = (done) ->
-    done(_data)
-
-  _lastState = 200
-
-  it "shall update", (done) ->
-    updater = apiMod.startUpdating db, _accessor
-    updater.on 'updated', ->
-      request.get "#{addr}/current/11", (err, res, body) ->
-        return done err if err
-        res.statusCode.should.eql 200
-        body = JSON.parse(body)
-        body.should.eql 200
-        done()
-    updater.doUpdate()
+  _lastState = 0
 
   it "shall update credit account and save change into history", (done) ->
     change =
       uid: 11
-      amount: -30
+      amount: 300
       desc: "Gandalf's hat"
 
-    apiMod.update db, change, (err, data) ->
+    updateMod.update g.sequelize.models, change, (err, data) ->
       return done(err) if err
 
-      request.get "#{addr}/current/11", (err, res, body) ->
+      request.get "#{addr}/state/11", (err, res, body) ->
         return done err if err
         res.statusCode.should.eql 200
         body = JSON.parse(body)
@@ -47,16 +32,16 @@ module.exports = (apiMod, db, addr, request) ->
       amount: -3000
       desc: "Gandalf's cloack"
 
-    apiMod.update db, change, (err, data) ->
+    updateMod.tryUpdateCredit g.sequelize.models, change, (err, data) ->
       return done("must not pass!") if not err
 
       err.should.eql "insufficient funds!"
 
-      request.get "#{addr}/current/11", (err, res, body) ->
+      request.get "#{addr}/state/11", (err, res, body) ->
         return done err if err
         res.statusCode.should.eql 200
         body = JSON.parse(body)
-        body.should.eql 170
+        body.should.eql 300
         done()
 
       #TODO check history has not changed

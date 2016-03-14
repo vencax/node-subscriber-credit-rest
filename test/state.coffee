@@ -1,16 +1,19 @@
 
 should = require('should')
+request = require('request').defaults({timeout: 50000})
 
 
-module.exports = (db, addr, request) ->
+module.exports = (g) ->
+
+  addr = g.baseurl
 
   it "must return current account balance", (done) ->
 
     account =
       uid: 11
-      state: 170
+      state: 300
 
-    request.get "#{addr}/current/11", (err, res, body) ->
+    request.get "#{addr}/state/11", (err, res, body) ->
       return done err if err
       res.statusCode.should.eql 200
       body = JSON.parse(body)
@@ -27,5 +30,5 @@ module.exports = (db, addr, request) ->
       return done err if err
       res.statusCode.should.eql 200
       body = JSON.parse(body)
-      body.length.should.eql 3
+      body.length.should.eql 1
       done()

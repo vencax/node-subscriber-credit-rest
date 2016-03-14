@@ -1,8 +1,8 @@
 {
   "name": "subscriber-credit",
-  "version": "0.0.2",
+  "version": "2.0.2",
   "description": "REST server maintainence of subscriber credit",
-  "main": "index.js",
+  "main": "index.coffee",
   "engines": {
     "node": ">=0.8.0"
   },
@@ -11,30 +11,21 @@
     "url": "https://github.com/vencax/node-subscriber-credit-rest"
   },
   "dependencies": {
-    "async": "^0.9.0"
   },
   "devDependencies": {
     "body-parser": "^1.8.2",
     "coffee-script": "^1.8.0",
     "express": "^4.9.0",
-    "grunt": "~0.4.1",
-    "grunt-cli": "*",
-    "grunt-coffeelint": "0.0.8",
-    "grunt-contrib-clean": "~0.4.0",
-    "grunt-contrib-coffee": "~0.6.4",
-    "grunt-contrib-connect": "~0.2.0",
-    "grunt-contrib-copy": "~0.4.0",
-    "grunt-exec": "^0.4.6",
-    "grunt-mocha-test": "~0.8.1",
     "horaa": "^0.1.2-alpha",
     "matchdep": "~0.1.1",
+    "mocha": "^2.3.4",
     "request": "^2.42.0",
-    "sequelize": "^2.0.0-rc2",
+    "sequelize": "^3.19.3",
     "should": "^4.0.4",
     "sqlite3": "^3.0.2"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "mocha --compilers coffee:coffee-script/register test"
   },
   "author": "Vaclav Klecanda",
   "license": "MIT"
