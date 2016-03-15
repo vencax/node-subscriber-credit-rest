@@ -30,7 +30,7 @@ describe "app", ->
     # register models
     mdls = require(__dirname + '/../models')(sequelize, Sequelize)
 
-    sequelize.sync().then () ->
+    sequelize.sync({ logging: console.log }).then () ->
       g.apiMod = apiMod(sequelize.models)
 
       api = express()
