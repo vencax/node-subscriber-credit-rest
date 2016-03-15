@@ -9,8 +9,12 @@ module.exports = (sequelize, Sequelize) ->
       type: Sequelize.DATE
       primaryKey: true
       defaultValue: Sequelize.NOW
-    desc: Sequelize.STRING
-    amount: Sequelize.FLOAT
+    desc:
+      type: Sequelize.STRING
+      allowNull: false
+    amount:
+      type: Sequelize.FLOAT
+      allowNull: false
   ,
     timestamps: false
     tableName: 'creditchanges'

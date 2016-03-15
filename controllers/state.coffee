@@ -2,8 +2,11 @@ Utils = require('./utils')
 
 module.exports = (models) ->
 
+  countBalance: (uid)->
+    return Utils.countBalance(models, uid)
+
   state: (req, res, next) ->
-    Utils.countBalance(req.user.id, models.creditchange).then (state)->
+    Utils.countBalance(models, req.user.id).then (state)->
       res.json state
     .catch (err)->
       res.status(400).send(err)

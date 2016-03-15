@@ -10,8 +10,8 @@ The transfer must be identified with unique id UID so it can be assotiated of pa
 On the oposite direction the credit is lowered according purchasing some services through api.
 Each credit change is stored in DB.
 
-The lib provides account checking stuff (updating).
-As well as REST api for checking CA state hookable as [express app](http://expressjs.com/).
+The lib provides REST api for checking CA state hookable as [express app](http://expressjs.com/).
+Plus updating functions.
 
 Install with:
 
@@ -22,23 +22,39 @@ Offers REST API as an express app that can be hooked just like this:
 ```javascript
   var Credit = require('subscriber-credit');
   // ...
-  var db = ... init sequelize ... models (db must be object of sequelize models)
+  var sequelize = ... init sequelize ... models (db must be object of sequelize models)
   // ...
+	var credit = Credit(sequelize.models);
   var app = express();
-  api.use('/api/credit', Credit.hookTo(app, db));
+  api.use('/api/credit', credit.initApp(app));
   // ...
-  // init the updating stuff
-  var bankaccessor = function(done) {
-    // func that shall all relevant items from bank account API and pass them to done
-    // each item object expected like this:
-    return [
-      {uid: 11, desc: 'credit refueling VencaX', amount: 300, date: date
-    }];
-  };
-  Credit.startUpdating(db, bankaccessor);
 ```
-  
+
+## credit updating
+
+Tipicaly on transfer to our bank account, so its state has to be checked periodically.
 Note that bankaccessor function shall return only records that corresponds to credit recharge.
 So you have to write your own.
+
+```javascript
+// ...
+credit = Credit(sequelize.models);
+// ...
+var bankaccessor = function(cb) {
+	// func returning all relevant items from bank account API and pass them to callback
+	// each item object expected like this:
+	return [
+		{uid: 11, desc: 'credit refueling VencaX', amount: 300, date: date
+	}];
+};
+// we process them in a timer or somth.
+bankaccessor(function(records) {
+	records.forEach(function(item) {
+		credit.update(item, function(err, newRec) {
+			// do whaterver on error either on newRec
+		});
+	});
+});
+```
 
 If you want to give a feedback, [raise an issue](https://github.com/vencax/node-subscriber-credit-rest/issues).

@@ -12,23 +12,21 @@ _increase = (change, cb) ->
     cb null, saved
   .catch onError
 
+module.exports = (models) ->
 
-exports.update = (models, change, done) ->
-  _increase models.creditchange.build(change), done
+  update: (change, cb) ->
+    _increase models.creditchange.build(change), cb
 
+  tryUpdateCredit: (change, cb) ->
+    Utils.countBalance(models, change.uid).then (state)->
+      if state + change.amount < 0
+        return cb('insufficient funds!')
 
-exports.tryUpdateCredit = (models, change, done) ->
-  Utils.countBalance(change.uid, models.creditchange).then (state)->
-    if state + change.amount < 0
-      return done('insufficient funds!')
+      _increase models.creditchange.build(change), cb
+    .catch (err)->
+      cb(err)
 
-    _increase models.creditchange.build(change), done
-  .catch (err)->
-    done(err)
-
-
-exports.mockincrease = (models) ->
-  (req, res, next) ->
+  mockincrease: (req, res, next) ->
     ch = models.creditchange.build
       uid: req.body.uid
       createdAt: new Date()

@@ -13,8 +13,7 @@ port = process.env.PORT || 3333
 describe "app", ->
 
   apiMod = require(__dirname + '/../index')
-  g =
-    apiMod: apiMod
+  g = {}
   Sequelize = require('sequelize')
 
   before (done) ->
@@ -32,8 +31,10 @@ describe "app", ->
     mdls = require(__dirname + '/../models')(sequelize, Sequelize)
 
     sequelize.sync().then () ->
+      g.apiMod = apiMod(sequelize.models)
+
       api = express()
-      api = apiMod api, sequelize.models
+      api = g.apiMod.initApp(api)
 
       app.use (req, res, next) ->
         req.user =

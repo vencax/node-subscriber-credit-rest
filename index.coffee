@@ -1,14 +1,23 @@
 State = require('./controllers/state')
+Update = require('./controllers/update')
 
-# create API app -------------------------------------------------------------
-module.exports = (app, models) ->
+module.exports = (models) ->
 
-  routes = State(models)
+  updateCtrls = Update(models)
 
-  app.get '/state/:uid', routes.state
-  app.get '/history', routes.history
+  update: updateCtrls.update
+  tryUpdateCredit: updateCtrls.tryUpdateCredit
 
-  if process.env.MOCK_TRANSFER
-    app.post '/increase', Update.mockincrease(models)
+  # create API app -------------------------------------------------------------
+  initApp: (app) ->
 
-  return app # for chaining
+    stateCtrls = State(models)
+    updateCtrls = Update(models)
+
+    app.get '/state/:uid', stateCtrls.state
+    app.get '/history', stateCtrls.history
+
+    if process.env.MOCK_TRANSFER
+      app.post '/increase', updateCtrls.mockincrease
+
+    return app # for chaining
